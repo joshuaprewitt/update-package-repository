@@ -42,14 +42,15 @@ feed_ids = []
 for feed in feeds["feeds"]:
     feed_ids.append(feed["id"])
     
-print("feed_ids = ",feed_ids)
+print("Feed IDs = ",feed_ids)
 
 # check for updates
+# todo: hard code feed ID for now, but will utlimately iterate over every feed
 feed_id = '5f518c1ba9460dbc70490640'
 check_url = host+'/v1/feeds/'+feed_id+'/update-check'
 response = requests.post(check_url, headers=configuration.api_key, verify=False)
 job_id = json.loads(response.text)["jobId"]
-print("job_id = ",job_id)
+print("Job ID = ",job_id)
 
 status = job_status(job_id)
 update_id = json.loads(status.text)["jobs"][0]["resourceId"]
@@ -72,7 +73,7 @@ headers = {'Content-type': 'application/json'}
 headers.update(configuration.api_key)
 response = requests.post(update_url, verify=False, data=updates, headers=headers)
 job_id = json.loads(response.text)["jobId"]
-print('update response = ',response.text)
+print('Update response = ',response.text)
 
 status = job_status(job_id)
 
