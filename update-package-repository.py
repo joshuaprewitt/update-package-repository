@@ -1,11 +1,10 @@
+import json
+import random
 import requests
 import sys
-import json
-import systemlink
 import systemlink.clientconfig
-import urllib3
 import time
-import random
+import urllib3
 
 # disable https warnings
 urllib3.disable_warnings()
@@ -14,21 +13,18 @@ urllib3.disable_warnings()
 configuration = systemlink.clientconfig.get_configuration('nirepo')
 host = configuration.host
 
-# disable cache to prevent getting stale data
 def dc():
+    # disable cache to prevent getting stale data
     return '?_dc='+str(random.randrange(10000000))
 
 def job_status(job_id):
-    # wait for the job to complete
+    # poll for the job to complete
     for i in range(10):
-        # create a random number to avoid getting cached server results
-        rand = str(random.randrange(100000))
         job_url =  host+'/v1/jobs'+dc()+'&id='+job_id
         response = requests.get(job_url, headers=configuration.api_key, verify=False)
         status = json.loads(response.text)["jobs"][0]["status"]
         if status == "SUCCEEDED":
             print('SUCCEEDED = ', response.text)
-            update_id = json.loads(response.text)["jobs"][0]["resourceId"]
             break
         if status == "FAILED":
             print('FAILED = ', response.text)
@@ -38,6 +34,7 @@ def job_status(job_id):
     return response
 
 def main():
+    # updates all of the feeds in the package repository based on the feeds they were replicated from
     # get feed ids
     feeds_url = host+"/v1/feeds"
     response = requests.get(feeds_url, headers=configuration.api_key, verify=False)
