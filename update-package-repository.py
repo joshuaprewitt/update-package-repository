@@ -7,12 +7,16 @@ import urllib3
 import time
 import random
 
+# disable cache to prevent getting stale data
+def dc():
+    return '?_dc='+str(random.randrange(10000000))
+
 def job_status(job_id):
     # wait for the job to complete
     for i in range(10):
         # create a random number to avoid getting cached server results
         rand = str(random.randrange(100000))
-        job_url =  host+'/v1/jobs?_dc='+rand+'&id='+job_id
+        job_url =  host+'/v1/jobs'+dc()+'&id='+job_id
         response = requests.get(job_url, headers=configuration.api_key, verify=False)
         status = json.loads(response.text)["jobs"][0]["status"]
         if status == "SUCCEEDED":
@@ -60,14 +64,12 @@ update_id = json.loads(status.text)["jobs"][0]["resourceId"]
 #    break
 
 # get list of updates
-rand = str(random.randrange(10000000))
-update_url =  host+'/v1/updates/'+update_id+'?_dc='+rand
+update_url =  host+'/v1/updates/'+update_id+dc()
 response = requests.get(update_url, headers=configuration.api_key, verify=False)
 updates = response.text
 print('Updates = ', response.text)
 
 # apply updates
-rand = str(random.randrange(100000))
 update_url =  host+'/v1/feeds/'+feed_id+'/update-apply?ignoreImportErrors=false&shouldOverwrite=false'
 headers = {'Content-type': 'application/json'}
 headers.update(configuration.api_key)
